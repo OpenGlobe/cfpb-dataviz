@@ -55,14 +55,23 @@
 <p>Click on the <a href="http://www.consumerfinance.gov/complaintdatabase/#download-the-data">Download Options and API</a>" button.  In the next section you'll be presented with an option to download the actual, raw data itself.</p>
             
 <p><img src="images/cfpb_download_data.png" alt="CFPB Data" height="75%" width="75%"></p> 
+ 
+            <p>For this tutorial, we're going to work a bit with the student loan data.  On the screen, select the "Student Loan" radio button, then from the first download option select "Only complaints with a consumer narrative", and finally make sure the file format is "CSV".  This will provide us with a file that is both easy to work with in MS Excel as well as RAW.  Click the download button. </p>
             
+<p>Now that we have our data (check your downloads folder to make sure it's there), go ahead and open the dataset.  If you have access to MS Excel, you can first open the program, then go to File --> Open, navigate to the file, and make sure you enable "All Files" in the dropdown menu (otherwise MS Excel may behave as though it can't open the CSV, which it actually can).</p>  
+            
+            <p><img src="images/student_loan_data.png" alt="CFPB Data" height="75%" width="75%"></p> 
+            
+<p>Excellent!  Move the dataset to a good working folder location that you'll remember for this project, and you're ready to proceed to step two.  </p>            
 <h3>
-<a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>About the Workshop</h3>
+<a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span class="octicon octicon-link"></span></a>Step Two: Setting up the Data</h3>
 
-<p>On the heels of the fantastic open data release by the Consumer Financial Protection Bureau (see <a href="http://www.consumerfinance.gov/complaintdatabase/" target="_blank">http://www.consumerfinance.gov/complaintdatabase/</a>), this workshop will provide those relatively new to data visualization tools with an opportunity to:</p>
+            <p>Now that we have our dataset, let's continue!  With the dataset open in MS Excel or other application, let's take note of a few things.  First, this dataset is huge!  With over 12,000 records going back to March 1st, 2012, we have a lot of data to look at.  While there are data visualization methods that work well with extremely large datasets, we will want to use a subset of these data.  Since we're doing some exploratory data visualization here, we're going to make some choices about what we want to begin looking at without the benefit of a broader analytical framework.  For this exercise that's ok - but we would want to check our data and methods if for example, we were making decisions on policy.  Data visualizations are powerful, so we do need to take care to make sure we're using the data correctly. </p>
+            
+            <p>Let's start by taking a subset of the data to begin with.  Remember that we're already working with a subset of the student loan data too - we've selected only records with a complaint narrative. Next, let's narrow the dataset down even further. </p>
 
-<p>1.  Learn about the CFPB data, and why the release is so important;</p>
-<p>2.  Learn a few basic data visualization types, uses, and broader exposure to data visualization taxonomies;</p>
+<p>First, select the column entitled "Issue".  In MS Excel you'll note that under the data tab you have the option to apply a filter.  Go ahead and do that, filtering out any records other than records that say "Can't repay my loan".</p>
+<p>Let's also only look at records since the beginning of the year.  Our data is already sorted by date, so go to the last record that has a date of 1/1/15 and select the record by clicking on the row number.  Next, go back to the top of the dataset, and while holding down the shift key, select row number 1.  You should now have a selection of only the records where "Issue" is "Can't repay my loan" and that were made since the beginning of the year.  Copy the data and paste it into a new sheet.</p>
 <p>3.  Learn some common do's and dont's when it comes to data visualization;</p>
 <p>4.  Explore a few free on-line data visualization tools using subsets of the CFPB data;</p>
 <p>5.  Have a hands-on opportunity to create and share your own data visualizations through an exploratory process.</p>
