@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  </head>
+
+
+<title>PIF Profile </title>
+<link rel="shortcut icon" href="https://gsafas.secure.force.com/apply/resource/1395783749000/pifa/pifa/pif-logo.png">
+
+
+<!--SETUP-->
+<html lang="en">
+<!--HEADERS-->
+
+
+
+ <head>
+  <meta charset="utf-8" />
+  
+  <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+  Remove this if you use the .htaccess -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+ <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+   google.load("jquery", "1");
+   google.setOnLoadCallback(function() {
+        initialize().then (
+            function (control) {
+                doTheTreeViz(control);
+            }
+        );
+   });
+  </script> 
+  
+  <style>
+	.link {
+		stroke: DarkSlateGrey;
+		opacity: 0.5;
+		stroke-width: 1px;
+		}
+	.node circle {
+		stroke: #fff;
+		opacity: 0.7;
+		stroke-width: 0px;
+		}
+	text {
+		font: 10px segoe ui;
+		color: DarkSlateGrey;
+		opacity: 0.5;
+		pointer-events: none;
+		}
+
+	parent .popup {
+		  display: none;
+		}
+
+	body{
+		background-color:White;
+		position: relative;
+	    font-family: "segoe ui";
+		}
+	
+
+   h1 {
+    font-size: 64px;
+    font-weight: 300;
+    letter-spacing: -2px;
+    margin: .3em 0 .1em 0;
+   }
+
+   h2 {
+    margin-top: 2em;
+   }
+
+   h1, h2 {
+    text-rendering: optimizeLegibility;
+   }
+
+   h2 a {
+    color: #ccc;
+    left: -20px;
+    position: absolute;
+    width: 740px;
+   }
+
+   footer {
+    font-size: small;
+    margin-top: 8em;
+   }
+
+   header aside {
+    margin-top: 20px;
+   }
+
+   header aside, footer aside {
+    color: #636363;
+    text-align: right;
+   }
+
+   aside {
+	 left: 5%;
+	 position: fixed;
+	 display:inline;
+	 font-size: small;
+   }
+   .attribution {
+    font-size: small;
+    margin-bottom: 2em;
+   }
+
+   body > p, li > p {
+    line-height: 1.5em;
+   }
+
+   body > p {
+    width: 720px;
+   }
+
+   body > blockquote {
+    width: 640px;
+   }
+
+   li {
+    width: 680px;
+   }
+
+   pre, code, textarea {
+    font-family: "Menlo", monospace;
+   }
+
+   code {
+    line-height: 1em;
+   }
+
+   textarea {
+    font-size: 100%;
+   }
+
+   body > pre {
+    border-left: solid 2px #ccc;
+    padding-left: 18px;
+    margin: 2em 0 2em -20px;
+   }
+
+   .html .value, .javascript .string, .javascript .regexp {
+    color: #756bb1;
+   }
+
+   .html .tag, .css .tag, .javascript .keyword {
+    color: #3182bd;
+   }
+
+   .comment {
+    color: #636363;
+   }
+
+   .html .doctype, .javascript .number {
+    color: #31a354;
+   }
+
+   .html .attribute, .css .attribute, .javascript .class, .javascript .special {
+    color: #e6550d;
+   }
+
+   svg {
+    font: 10px sans-serif;
+    
+   }
+
+   .axis path, .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+   }
+
+   sup, sub {
+    line-height: 0;
+   }
+
+   q:before, blockquote:before {
+    content: "?";
+   }
+
+   q:after, blockquote:after {
+    content: "?";
+   }
+
+   blockquote:before {
+    position: absolute;
+    left: 2em;
+   }
+
+   blockquote:after {
+    position: absolute;
+   }
+
+   #chart {
+    height: 100vh;
+   }
+   .node rect {
+    cursor: move;
+    fill-opacity: .9;
+    shape-rendering: crispEdges;
+   }
+    
+   .node text {
+    pointer-events: none;
+    text-shadow: 0 1px 0 #fff;
+   }
+   .link {
+    fill: none;
+    stroke: #000;
+    stroke-opacity: .2;
+   }
+   .link:hover {
+    stroke-opacity: .5;
+   }
+
+   circle.node-dot {
+    fill: DarkSlateGray;
+    stroke: SlateGray;
+    stroke-width: 0px;
+	stroke-opacity: 0.8
+   }
+
+
+   line.link {
+    fill: none;
+    stroke: SlateGray;
+    stroke-width: 1.5px;
+   }
+
+   marker#defaultMarker {
+    fill: SlateGray;
+   }
+
+   line.link.defaultMarker {
+    stroke: SlateGray;
+   }
+
+   circle {
+    fill: #ccc;
+    stroke: #333;
+    stroke-width: 1x;
+	opacity: 0.7;
+   }
+
+   text {
+    pointer-events: none;
+   }
+
+   text.shadow {
+    stroke: #fff;
+    stroke-width: 3px;
+    stroke-opacity: .8;
+   }
+
+   #woot{
+    position: absolute;
+    bottom: 0%;
+   }
+  </style>  
+  
+  <script>
+  function doTheTreeViz(control) {
+
+    var svg = control.svg;
+
+    var force = control.force;
+    force.nodes(control.nodes)
+        .links(control.links)
+		.on("tick",tick)
+        .start();
+
+    // Update the links
+    var link = svg.selectAll("line.link")
+        .data(control.links, function(d) { return d.unique; } );
+ 
+   // Enter any new links
+    link.enter().insert("svg:line", ".node")
+        .attr("class", "link")
+        .attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; })
+      .append("svg:title")
+        .text(function(d) { return d.source[control.options.nodeLabel] + ":" + d.target[control.options.nodeLabel] ; });
+    
+    // Exit any old links.
+    link.exit().remove();
+
+
+  // Update the nodes
+    var node = svg.selectAll("g.node")
+        .data(control.nodes, function(d) { return d.unique; });
+
+		node.select("circle")
+			.style("fill", function(d) {
+				return getColor(d);
+			})
+			.attr("r", function(d) {
+				return getRadius(d);
+			})
+			
+
+			
+  // Enter any new nodes.
+    var nodeEnter = node.enter()
+      .append("svg:g")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+        .on("dblclick", function(d){
+            control.nodeClickInProgress=false;
+            if (d.url)window.open(d.url);
+        })
+        .on("click", function(d){
+            // this is a hack so that click doesnt fire on the1st click of a dblclick
+            if (!control.nodeClickInProgress ) {
+                control.nodeClickInProgress = true;
+                setTimeout(function(){
+                    if (control.nodeClickInProgress) { 
+                        control.nodeClickInProgress = false;
+                        if (control.options.nodeFocus) {
+                            d.isCurrentlyFocused = !d.isCurrentlyFocused;
+                            doTheTreeViz(makeFilteredData(control));
+                        }
+                    }
+                },control.clickHack); 
+            }
+        })
+        .call(force.drag);
+
+    nodeEnter
+      .append("svg:circle")
+        .attr("r", function(d) {
+            return getRadius(d);
+        })
+        .style("fill", function(d) {
+            return getColor(d);
+        })
+      .append("svg:title")
+        .text(function(d) { return d[control.options.nodeLabel]; });
+
+   if (control.options.nodeLabel) {       
+       // text is done once for shadow as well as for text
+        nodeEnter.append("svg:text")
+            .attr("x", control.options.labelOffset)
+            .attr("dy", ".31em")
+            .attr("class", "shadow")
+            .style("font-size",control.options.labelFontSize + "px")
+            .text(function(d) {
+                return d.shortName ? d.shortName : d.name;
+            });
+        nodeEnter.append("svg:text")
+            .attr("x", control.options.labelOffset)
+            .attr("dy", ".35em")
+            .attr("class", "text")
+            .style("font-size",control.options.labelFontSize + "px")
+            .text(function(d) {
+                return d.shortName ? d.shortName : d.name;
+            });
+    }
+
+    // Exit any old nodes.
+    node.exit().remove();
+    control.link = svg.selectAll("line.link");
+    control.node = svg.selectAll("g.node");
+    force.on("tick", tick);
+
+
+
+    if (control.options.linkName) {
+        link.append("title")
+            .text(function(d) {
+                return d[control.options.linkName];
+        });
+    }
+
+
+	var h = innerHeight;
+	var w = innerWidth;
+	
+    function tick() {
+	
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+        node.attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")";
+			
+	node.attr("cx", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+        .attr("cy", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); });
+
+        });
+
+		
+    }
+ 
+    function getRadius(d) {
+     var r = control.options.radius * (control.options.nodeResize ? Math.sqrt(d[control.options.nodeResize]) / Math.PI : 1);
+     return control.options.nodeFocus && d.isCurrentlyFocused ? control.options.nodeFocusRadius  : r;
+    }
+    function getColor(d) {
+        return control.options.nodeFocus && d.isCurrentlyFocused ? control.options.nodeFocusColor  : control.color(d.group) ;
+    }
+
+   }
+
+function makeFilteredData(control,selectedNode){
+    // we'll keep only the data where filterned nodes are the source or target
+    var newNodes = [];
+    var newLinks = [];
+
+    for (var i = 0; i < control.data.links.length ; i++) {
+        var link = control.data.links[i];
+        if (link.target.isCurrentlyFocused || link.source.isCurrentlyFocused) {
+            newLinks.push(link);
+            addNodeIfNotThere(link.source,newNodes);
+            addNodeIfNotThere(link.target,newNodes);
+        }
+    }
+    // if none are selected reinstate the whole dataset
+    if (newNodes.length > 0) {
+        control.links = newLinks;
+        control.nodes = newNodes;
+    }
+    else {
+        control.nodes = control.data.nodes;
+        control.links = control.data.links;
+    }
+    return control;
+    
+    function addNodeIfNotThere( node, nodes) {
+        for ( var i=0; i < nodes.length; i++) {
+            if (nodes[i].unique == node.unique) return i;
+        }
+        return nodes.push(node) -1;
+    }
+}
+function organizeData(control) {
+
+    for (var i=0; i < control.nodes.length; i ++ ) {
+        var node = control.nodes[i]; 
+        node.unique = i;
+        node.isCurrentlyFocused = false;
+    }
+    
+    for (var i=0; i < control.links.length; i ++ ) {
+        var link = control.links[i];
+        link.unique = i;
+        link.source = control.nodes[link.source];
+        link.target = control.nodes[link.target];
+    }
+    return control;
+}
+
+
+function initialize () {
+   
+    var initPromise = $.Deferred();
+
+    getTheData().then( function (data) {  
+        var control = {};
+        control.data = data;
+        control.divName = "#chart";
+
+        control.options = $.extend({
+            stackHeight : 12,
+            radius : 5,
+            fontSize : 14,
+            labelFontSize : 8,
+            nodeLabel : null,
+            markerWidth : 0,
+            markerHeight : 0,
+            width : $(control.divName).outerWidth(),
+            gap : 1.5,
+            nodeResize : "",
+            linkDistance : 100,
+            charge : -200,
+            styleColumn : null,
+            styles : null,
+            linkName : null,
+            nodeFocus: true,
+            nodeFocusRadius: 25,
+            nodeFocusColor: "black",
+            labelOffset: "5",
+            gravity: .05,
+            height : $(control.divName).outerHeight()
+        }, control.data.d3.options);
+    
+        
+        var options = control.options;
+        options.gap = options.gap * options.radius;
+        control.width = options.width;
+        control.height = options.height;
+        control.data = control.data.d3.data;
+        control.nodes = control.data.nodes;
+        control.links = control.data.links;
+        control.color = d3.scale.category20();
+        control.clickHack = 200;
+        organizeData(control);
+    
+        control.svg = d3.select(control.divName)
+            .append("svg:svg")
+            .attr("width", control.width)
+            .attr("height", control.height);
+        
+    
+        // get list of unique values in stylecolumn
+        control.linkStyles = [];
+        if (control.options.styleColumn) {
+         var x;
+         for (var i = 0; i < control.links.length; i++) {
+          if (control.linkStyles.indexOf( x = control.links[i][control.options.styleColumn].toLowerCase()) == -1)
+           control.linkStyles.push(x);
+         }
+        } 
+        else
+         control.linkStyles[0] = "defaultMarker";
+        
+        control.force = d3.layout.force().
+            size([control.width, control.height])
+            .linkDistance(control.options.linkDistance)
+            .charge(control.options.charge)
+            .gravity(control.options.gravity);
+    
+    
+       initPromise.resolve(control);
+    });
+    return initPromise.promise();
+}
+
+            
+function getTheData() {
+    var dataPromise = $.Deferred();
+    // return a promise if data is being received asynch and resolve it when done.
+    dataPromise.resolve (PIFTREE);
+    return dataPromise.promise();
+}
+var widthval = innerWidth()
+var heightval = innerHeight()
+
+</script>
+
+
+
+<script> 
+window['PIFTREE'] = 
+	{"d3":
+		{"options":
+			{"radius":30,
+			"fontSize":9,
+			"labelFontSize":12,
+			"gravity":0.2,
+			"width":widthval,
+      "height":heightval,
+			"nodeFocusColor":"yellow",
+			"nodeFocusRadius":25,
+			"nodeFocus":true,
+			"linkDistance":80,
+			"charge":-200,
+			"nodeResize":"count",
+			"nodeLabel":"label",
+			"linkName":"tag"},
+	"data":{
+		"nodes":[
+		<!--end-->
+   {'name':'_CDCertificateofdeposit','count':9.182736454,'group':'Closed','linkCount':3,'label':'(CD) Certificate of deposit(Closed): 30.3%','userCount':true,'url':'','shortName':'(CD) Certificate of deposit'},
+{'name':'_CDCertificateofdeposit','count':8.718624711,'group':'Closed with explanation','linkCount':3,'label':'(CD) Certificate of deposit(Closed with explanation): 29.5%','userCount':true,'url':'','shortName':'(CD) Certificate of deposit'},
+{'name':'_CDCertificateofdeposit','count':1,'group':'Closed with monetary relief','linkCount':3,'label':'(CD) Certificate of deposit(Closed with monetary relief): 10%','userCount':true,'url':'','shortName':'(CD) Certificate of deposit'},
+{'name':'_CDCertificateofdeposit','count':3.939164383,'group':'Closed with non-monetary relief','linkCount':3,'label':'(CD) Certificate of deposit(Closed with non-monetary relief): 19.8%','userCount':true,'url':'','shortName':'(CD) Certificate of deposit'},
+{'name':'_CDCertificateofdeposit','count':2.872737718,'group':'Closed with relief','linkCount':3,'label':'(CD) Certificate of deposit(Closed with relief): 16.9%','userCount':true,'url':'','shortName':'(CD) Certificate of deposit'},
+{'name':'_CDCertificateofdeposit','count':7.787993508,'group':'Closed without relief','linkCount':3,'label':'(CD) Certificate of deposit(Closed without relief): 27.9%','userCount':true,'url':'','shortName':'(CD) Certificate of deposit'},
+{'name':'_Auto','count':1.859504133,'group':'Closed','linkCount':3,'label':'Auto(Closed): 13.6%','userCount':true,'url':'','shortName':'Auto'},
+{'name':'_Auto','count':4.545635151,'group':'Closed with explanation','linkCount':3,'label':'Auto(Closed with explanation): 21.3%','userCount':true,'url':'','shortName':'Auto'},
+{'name':'_Auto','count':1.619834711,'group':'Closed with monetary relief','linkCount':3,'label':'Auto(Closed with monetary relief): 12.7%','userCount':true,'url':'','shortName':'Auto'},
+{'name':'_Auto','count':1.794830705,'group':'Closed with non-monetary relief','linkCount':3,'label':'Auto(Closed with non-monetary relief): 13.4%','userCount':true,'url':'','shortName':'Auto'},
+{'name':'_Cashingacheckwithoutanaccount','count':6.925207754,'group':'Closed','linkCount':3,'label':'Cashing a check without an account(Closed): 26.3%','userCount':true,'url':'','shortName':'Cashing a check without an account'},
+{'name':'_Cashingacheckwithoutanaccount','count':5.026532087,'group':'Closed with explanation','linkCount':3,'label':'Cashing a check without an account(Closed with explanation): 22.4%','userCount':true,'url':'','shortName':'Cashing a check without an account'},
+{'name':'_Cashingacheckwithoutanaccount','count':1.234567901,'group':'Closed with monetary relief','linkCount':3,'label':'Cashing a check without an account(Closed with monetary relief): 11.1%','userCount':true,'url':'','shortName':'Cashing a check without an account'},
+{'name':'_Cashingacheckwithoutanaccount','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Cashing a check without an account(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Cashing a check without an account'},
+{'name':'_Cashingacheckwithoutanaccount','count':11.11111111,'group':'Closed with relief','linkCount':3,'label':'Cashing a check without an account(Closed with relief): 33.3%','userCount':true,'url':'','shortName':'Cashing a check without an account'},
+{'name':'_Cashingacheckwithoutanaccount','count':4.340277776,'group':'Closed without relief','linkCount':3,'label':'Cashing a check without an account(Closed without relief): 20.8%','userCount':true,'url':'','shortName':'Cashing a check without an account'},
+{'name':'_Checkcashing','count':0,'group':'Closed','linkCount':3,'label':'Check cashing(Closed): 0%','userCount':true,'url':'','shortName':'Check cashing'},
+{'name':'_Checkcashing','count':5.325443788,'group':'Closed with explanation','linkCount':3,'label':'Check cashing(Closed with explanation): 23.1%','userCount':true,'url':'','shortName':'Check cashing'},
+{'name':'_Checkcashing','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Check cashing(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Check cashing'},
+{'name':'_Checkcashing','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Check cashing(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Check cashing'},
+{'name':'_Checkingaccount','count':4.438044446,'group':'Closed','linkCount':3,'label':'Checking account(Closed): 21.1%','userCount':true,'url':'','shortName':'Checking account'},
+{'name':'_Checkingaccount','count':5.229510395,'group':'Closed with explanation','linkCount':3,'label':'Checking account(Closed with explanation): 22.9%','userCount':true,'url':'','shortName':'Checking account'},
+{'name':'_Checkingaccount','count':0.9160538171,'group':'Closed with monetary relief','linkCount':3,'label':'Checking account(Closed with monetary relief): 9.6%','userCount':true,'url':'','shortName':'Checking account'},
+{'name':'_Checkingaccount','count':3.001273946,'group':'Closed with non-monetary relief','linkCount':3,'label':'Checking account(Closed with non-monetary relief): 17.3%','userCount':true,'url':'','shortName':'Checking account'},
+{'name':'_Checkingaccount','count':1.920050629,'group':'Closed with relief','linkCount':3,'label':'Checking account(Closed with relief): 13.9%','userCount':true,'url':'','shortName':'Checking account'},
+{'name':'_Checkingaccount','count':6.469429706,'group':'Closed without relief','linkCount':3,'label':'Checking account(Closed without relief): 25.4%','userCount':true,'url':'','shortName':'Checking account'},
+{'name':'_ConventionaladjustablemortgageARM','count':7.159568284,'group':'Closed','linkCount':3,'label':'Conventional adjustable mortgage (ARM)(Closed): 26.8%','userCount':true,'url':'','shortName':'Conventional adjustable mortgage (ARM)'},
+{'name':'_ConventionaladjustablemortgageARM','count':7.00202296,'group':'Closed with explanation','linkCount':3,'label':'Conventional adjustable mortgage (ARM)(Closed with explanation): 26.5%','userCount':true,'url':'','shortName':'Conventional adjustable mortgage (ARM)'},
+{'name':'_ConventionaladjustablemortgageARM','count':3.803309172,'group':'Closed with monetary relief','linkCount':3,'label':'Conventional adjustable mortgage (ARM)(Closed with monetary relief): 19.5%','userCount':true,'url':'','shortName':'Conventional adjustable mortgage (ARM)'},
+{'name':'_ConventionaladjustablemortgageARM','count':5.808446766,'group':'Closed with non-monetary relief','linkCount':3,'label':'Conventional adjustable mortgage (ARM)(Closed with non-monetary relief): 24.1%','userCount':true,'url':'','shortName':'Conventional adjustable mortgage (ARM)'},
+{'name':'_ConventionaladjustablemortgageARM','count':3.334593575,'group':'Closed with relief','linkCount':3,'label':'Conventional adjustable mortgage (ARM)(Closed with relief): 18.3%','userCount':true,'url':'','shortName':'Conventional adjustable mortgage (ARM)'},
+{'name':'_ConventionaladjustablemortgageARM','count':12.34329118,'group':'Closed without relief','linkCount':3,'label':'Conventional adjustable mortgage (ARM)(Closed without relief): 35.1%','userCount':true,'url':'','shortName':'Conventional adjustable mortgage (ARM)'},
+{'name':'_Conventionalfixedmortgage','count':6.091237558,'group':'Closed','linkCount':3,'label':'Conventional fixed mortgage(Closed): 24.7%','userCount':true,'url':'','shortName':'Conventional fixed mortgage'},
+{'name':'_Conventionalfixedmortgage','count':6.749892672,'group':'Closed with explanation','linkCount':3,'label':'Conventional fixed mortgage(Closed with explanation): 26%','userCount':true,'url':'','shortName':'Conventional fixed mortgage'},
+{'name':'_Conventionalfixedmortgage','count':2.581026606,'group':'Closed with monetary relief','linkCount':3,'label':'Conventional fixed mortgage(Closed with monetary relief): 16.1%','userCount':true,'url':'','shortName':'Conventional fixed mortgage'},
+{'name':'_Conventionalfixedmortgage','count':4.250631585,'group':'Closed with non-monetary relief','linkCount':3,'label':'Conventional fixed mortgage(Closed with non-monetary relief): 20.6%','userCount':true,'url':'','shortName':'Conventional fixed mortgage'},
+{'name':'_Conventionalfixedmortgage','count':5.179548157,'group':'Closed with relief','linkCount':3,'label':'Conventional fixed mortgage(Closed with relief): 22.8%','userCount':true,'url':'','shortName':'Conventional fixed mortgage'},
+{'name':'_Conventionalfixedmortgage','count':11.307702,'group':'Closed without relief','linkCount':3,'label':'Conventional fixed mortgage(Closed without relief): 33.6%','userCount':true,'url':'','shortName':'Conventional fixed mortgage'},
+{'name':'_Creditcard','count':1.649692788,'group':'Closed','linkCount':3,'label':'Credit card(Closed): 12.8%','userCount':true,'url':'','shortName':'Credit card'},
+{'name':'_Creditcard','count':4.803148527,'group':'Closed with explanation','linkCount':3,'label':'Credit card(Closed with explanation): 21.9%','userCount':true,'url':'','shortName':'Credit card'},
+{'name':'_Creditcard','count':0.8393845775,'group':'Closed with monetary relief','linkCount':3,'label':'Credit card(Closed with monetary relief): 9.2%','userCount':true,'url':'','shortName':'Credit card'},
+{'name':'_Creditcard','count':1.285774213,'group':'Closed with non-monetary relief','linkCount':3,'label':'Credit card(Closed with non-monetary relief): 11.3%','userCount':true,'url':'','shortName':'Credit card'},
+{'name':'_Creditrepair','count':2.25,'group':'Closed with explanation','linkCount':3,'label':'Credit repair(Closed with explanation): 15%','userCount':true,'url':'','shortName':'Credit repair'},
+{'name':'_Creditrepair','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Credit repair(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Credit repair'},
+{'name':'_Creditrepair','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Credit repair(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Credit repair'},
+{'name':'_Debtsettlement','count':0.7346938773,'group':'Closed with explanation','linkCount':3,'label':'Debt settlement(Closed with explanation): 8.6%','userCount':true,'url':'','shortName':'Debt settlement'},
+{'name':'_Debtsettlement','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Debt settlement(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Debt settlement'},
+{'name':'_Debtsettlement','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Debt settlement(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Debt settlement'},
+{'name':'_DomesticUSmoneytransfer','count':1.108033241,'group':'Closed','linkCount':3,'label':'Domestic (US) money transfer(Closed): 10.5%','userCount':true,'url':'','shortName':'Domestic (US) money transfer'},
+{'name':'_DomesticUSmoneytransfer','count':3.142167969,'group':'Closed with explanation','linkCount':3,'label':'Domestic (US) money transfer(Closed with explanation): 17.7%','userCount':true,'url':'','shortName':'Domestic (US) money transfer'},
+{'name':'_DomesticUSmoneytransfer','count':0.8899964392,'group':'Closed with monetary relief','linkCount':3,'label':'Domestic (US) money transfer(Closed with monetary relief): 9.4%','userCount':true,'url':'','shortName':'Domestic (US) money transfer'},
+{'name':'_DomesticUSmoneytransfer','count':2.040816328,'group':'Closed with non-monetary relief','linkCount':3,'label':'Domestic (US) money transfer(Closed with non-monetary relief): 14.3%','userCount':true,'url':'','shortName':'Domestic (US) money transfer'},
+{'name':'_ElectronicBenefitTransfer/EBTcard','count':0,'group':'Closed with explanation','linkCount':3,'label':'Electronic Benefit Transfer / EBT card(Closed with explanation): 0%','userCount':true,'url':'','shortName':'Electronic Benefit Transfer / EBT card'},
+{'name':'_FHAmortgage','count':7.84,'group':'Closed','linkCount':3,'label':'FHA mortgage(Closed): 28%','userCount':true,'url':'','shortName':'FHA mortgage'},
+{'name':'_FHAmortgage','count':5.995547229,'group':'Closed with explanation','linkCount':3,'label':'FHA mortgage(Closed with explanation): 24.5%','userCount':true,'url':'','shortName':'FHA mortgage'},
+{'name':'_FHAmortgage','count':3.576606084,'group':'Closed with monetary relief','linkCount':3,'label':'FHA mortgage(Closed with monetary relief): 18.9%','userCount':true,'url':'','shortName':'FHA mortgage'},
+{'name':'_FHAmortgage','count':3.784793387,'group':'Closed with non-monetary relief','linkCount':3,'label':'FHA mortgage(Closed with non-monetary relief): 19.5%','userCount':true,'url':'','shortName':'FHA mortgage'},
+{'name':'_FHAmortgage','count':3.543252594,'group':'Closed with relief','linkCount':3,'label':'FHA mortgage(Closed with relief): 18.8%','userCount':true,'url':'','shortName':'FHA mortgage'},
+{'name':'_FHAmortgage','count':10.4461097,'group':'Closed without relief','linkCount':3,'label':'FHA mortgage(Closed without relief): 32.3%','userCount':true,'url':'','shortName':'FHA mortgage'},
+{'name':'_Federalstudentloan','count':5.668934241,'group':'Closed','linkCount':3,'label':'Federal student loan(Closed): 23.8%','userCount':true,'url':'','shortName':'Federal student loan'},
+{'name':'_Federalstudentloan','count':3.440133055,'group':'Closed with explanation','linkCount':3,'label':'Federal student loan(Closed with explanation): 18.5%','userCount':true,'url':'','shortName':'Federal student loan'},
+{'name':'_Federalstudentloan','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Federal student loan(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Federal student loan'},
+{'name':'_Federalstudentloan','count':2.040816328,'group':'Closed with non-monetary relief','linkCount':3,'label':'Federal student loan(Closed with non-monetary relief): 14.3%','userCount':true,'url':'','shortName':'Federal student loan'},
+{'name':'_Foreigncurrencyexchange','count':0,'group':'Closed','linkCount':3,'label':'Foreign currency exchange(Closed): 0%','userCount':true,'url':'','shortName':'Foreign currency exchange'},
+{'name':'_Foreigncurrencyexchange','count':0.4444444449,'group':'Closed with explanation','linkCount':3,'label':'Foreign currency exchange(Closed with explanation): 6.7%','userCount':true,'url':'','shortName':'Foreign currency exchange'},
+{'name':'_Foreigncurrencyexchange','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Foreign currency exchange(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Foreign currency exchange'},
+{'name':'_Generalpurposecard','count':0,'group':'Closed','linkCount':3,'label':'General purpose card(Closed): 0%','userCount':true,'url':'','shortName':'General purpose card'},
+{'name':'_Generalpurposecard','count':5.63791414,'group':'Closed with explanation','linkCount':3,'label':'General purpose card(Closed with explanation): 23.7%','userCount':true,'url':'','shortName':'General purpose card'},
+{'name':'_Generalpurposecard','count':1.234567901,'group':'Closed with monetary relief','linkCount':3,'label':'General purpose card(Closed with monetary relief): 11.1%','userCount':true,'url':'','shortName':'General purpose card'},
+{'name':'_Generalpurposecard','count':0.390625,'group':'Closed with non-monetary relief','linkCount':3,'label':'General purpose card(Closed with non-monetary relief): 6.3%','userCount':true,'url':'','shortName':'General purpose card'},
+{'name':'_Giftormerchantcard','count':0,'group':'Closed','linkCount':3,'label':'Gift or merchant card(Closed): 0%','userCount':true,'url':'','shortName':'Gift or merchant card'},
+{'name':'_Giftormerchantcard','count':4,'group':'Closed with explanation','linkCount':3,'label':'Gift or merchant card(Closed with explanation): 20%','userCount':true,'url':'','shortName':'Gift or merchant card'},
+{'name':'_Giftormerchantcard','count':1.44,'group':'Closed with monetary relief','linkCount':3,'label':'Gift or merchant card(Closed with monetary relief): 12%','userCount':true,'url':'','shortName':'Gift or merchant card'},
+{'name':'_Giftormerchantcard','count':2.777777779,'group':'Closed with non-monetary relief','linkCount':3,'label':'Gift or merchant card(Closed with non-monetary relief): 16.7%','userCount':true,'url':'','shortName':'Gift or merchant card'},
+{'name':'_Governmentbenefitpaymentcard','count':0,'group':'Closed','linkCount':3,'label':'Government benefit payment card(Closed): 0%','userCount':true,'url':'','shortName':'Government benefit payment card'},
+{'name':'_Governmentbenefitpaymentcard','count':4,'group':'Closed with explanation','linkCount':3,'label':'Government benefit payment card(Closed with explanation): 20%','userCount':true,'url':'','shortName':'Government benefit payment card'},
+{'name':'_Governmentbenefitpaymentcard','count':0.1736111114,'group':'Closed with monetary relief','linkCount':3,'label':'Government benefit payment card(Closed with monetary relief): 4.2%','userCount':true,'url':'','shortName':'Government benefit payment card'},
+{'name':'_Governmentbenefitpaymentcard','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Government benefit payment card(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Government benefit payment card'},
+{'name':'_Homeequityloanorlineofcredit','count':8.357853599,'group':'Closed','linkCount':3,'label':'Home equity loan or line of credit(Closed): 28.9%','userCount':true,'url':'','shortName':'Home equity loan or line of credit'},
+{'name':'_Homeequityloanorlineofcredit','count':8.451860007,'group':'Closed with explanation','linkCount':3,'label':'Home equity loan or line of credit(Closed with explanation): 29.1%','userCount':true,'url':'','shortName':'Home equity loan or line of credit'},
+{'name':'_Homeequityloanorlineofcredit','count':3.247637003,'group':'Closed with monetary relief','linkCount':3,'label':'Home equity loan or line of credit(Closed with monetary relief): 18%','userCount':true,'url':'','shortName':'Home equity loan or line of credit'},
+{'name':'_Homeequityloanorlineofcredit','count':3.790429948,'group':'Closed with non-monetary relief','linkCount':3,'label':'Home equity loan or line of credit(Closed with non-monetary relief): 19.5%','userCount':true,'url':'','shortName':'Home equity loan or line of credit'},
+{'name':'_Homeequityloanorlineofcredit','count':1.993079585,'group':'Closed with relief','linkCount':3,'label':'Home equity loan or line of credit(Closed with relief): 14.1%','userCount':true,'url':'','shortName':'Home equity loan or line of credit'},
+{'name':'_Homeequityloanorlineofcredit','count':8.163265305,'group':'Closed without relief','linkCount':3,'label':'Home equity loan or line of credit(Closed without relief): 28.6%','userCount':true,'url':'','shortName':'Home equity loan or line of credit'},
+{'name':'_IDprepaidcard','count':0,'group':'Closed','linkCount':3,'label':'ID prepaid card(Closed): 0%','userCount':true,'url':'','shortName':'ID prepaid card'},
+{'name':'_IDprepaidcard','count':10.12396694,'group':'Closed with explanation','linkCount':3,'label':'ID prepaid card(Closed with explanation): 31.8%','userCount':true,'url':'','shortName':'ID prepaid card'},
+{'name':'_IDprepaidcard','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'ID prepaid card(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'ID prepaid card'},
+{'name':'_IDprepaidcard','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'ID prepaid card(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'ID prepaid card'},
+{'name':'_Installmentloan','count':5.586776861,'group':'Closed','linkCount':3,'label':'Installment loan(Closed): 23.6%','userCount':true,'url':'','shortName':'Installment loan'},
+{'name':'_Installmentloan','count':6.055100259,'group':'Closed with explanation','linkCount':3,'label':'Installment loan(Closed with explanation): 24.6%','userCount':true,'url':'','shortName':'Installment loan'},
+{'name':'_Installmentloan','count':1.466696997,'group':'Closed with monetary relief','linkCount':3,'label':'Installment loan(Closed with monetary relief): 12.1%','userCount':true,'url':'','shortName':'Installment loan'},
+{'name':'_Installmentloan','count':3.006308534,'group':'Closed with non-monetary relief','linkCount':3,'label':'Installment loan(Closed with non-monetary relief): 17.3%','userCount':true,'url':'','shortName':'Installment loan'},
+{'name':'_Installmentloan','count':2.777777779,'group':'Closed with relief','linkCount':3,'label':'Installment loan(Closed with relief): 16.7%','userCount':true,'url':'','shortName':'Installment loan'},
+{'name':'_Installmentloan','count':13.5734072,'group':'Closed without relief','linkCount':3,'label':'Installment loan(Closed without relief): 36.8%','userCount':true,'url':'','shortName':'Installment loan'},
+{'name':'_Internationalmoneytransfer','count':0.8264462808,'group':'Closed','linkCount':3,'label':'International money transfer(Closed): 9.1%','userCount':true,'url':'','shortName':'International money transfer'},
+{'name':'_Internationalmoneytransfer','count':2.11475299,'group':'Closed with explanation','linkCount':3,'label':'International money transfer(Closed with explanation): 14.5%','userCount':true,'url':'','shortName':'International money transfer'},
+{'name':'_Internationalmoneytransfer','count':0.4060938101,'group':'Closed with monetary relief','linkCount':3,'label':'International money transfer(Closed with monetary relief): 6.4%','userCount':true,'url':'','shortName':'International money transfer'},
+{'name':'_Internationalmoneytransfer','count':2.493074791,'group':'Closed with non-monetary relief','linkCount':3,'label':'International money transfer(Closed with non-monetary relief): 15.8%','userCount':true,'url':'','shortName':'International money transfer'},
+{'name':'_Medical','count':3.764758296,'group':'Closed','linkCount':3,'label':'Medical(Closed): 19.4%','userCount':true,'url':'','shortName':'Medical'},
+{'name':'_Medical','count':5.12115516,'group':'Closed with explanation','linkCount':3,'label':'Medical(Closed with explanation): 22.6%','userCount':true,'url':'','shortName':'Medical'},
+{'name':'_Medical','count':3.22156476,'group':'Closed with monetary relief','linkCount':3,'label':'Medical(Closed with monetary relief): 17.9%','userCount':true,'url':'','shortName':'Medical'},
+{'name':'_Medical','count':1.198785231,'group':'Closed with non-monetary relief','linkCount':3,'label':'Medical(Closed with non-monetary relief): 10.9%','userCount':true,'url':'','shortName':'Medical'},
+{'name':'_Mobilewallet','count':0,'group':'Closed','linkCount':3,'label':'Mobile wallet(Closed): 0%','userCount':true,'url':'','shortName':'Mobile wallet'},
+{'name':'_Mobilewallet','count':11.11111111,'group':'Closed with explanation','linkCount':3,'label':'Mobile wallet(Closed with explanation): 33.3%','userCount':true,'url':'','shortName':'Mobile wallet'},
+{'name':'_Mobilewallet','count':5.325443788,'group':'Closed with monetary relief','linkCount':3,'label':'Mobile wallet(Closed with monetary relief): 23.1%','userCount':true,'url':'','shortName':'Mobile wallet'},
+{'name':'_Mobilewallet','count':1.147959183,'group':'Closed with non-monetary relief','linkCount':3,'label':'Mobile wallet(Closed with non-monetary relief): 10.7%','userCount':true,'url':'','shortName':'Mobile wallet'},
+{'name':'_Moneyorder','count':2.56,'group':'Closed with explanation','linkCount':3,'label':'Money order(Closed with explanation): 16%','userCount':true,'url':'','shortName':'Money order'},
+{'name':'_Moneyorder','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Money order(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Money order'},
+{'name':'_Mortgage','count':12.31148046,'group':'Closed','linkCount':3,'label':'Mortgage(Closed): 35.1%','userCount':true,'url':'','shortName':'Mortgage'},
+{'name':'_Mortgage','count':8.533346576,'group':'Closed with explanation','linkCount':3,'label':'Mortgage(Closed with explanation): 29.2%','userCount':true,'url':'','shortName':'Mortgage'},
+{'name':'_Mortgage','count':2.040816328,'group':'Closed with monetary relief','linkCount':3,'label':'Mortgage(Closed with monetary relief): 14.3%','userCount':true,'url':'','shortName':'Mortgage'},
+{'name':'_Mortgage','count':1.684051047,'group':'Closed with non-monetary relief','linkCount':3,'label':'Mortgage(Closed with non-monetary relief): 13%','userCount':true,'url':'','shortName':'Mortgage'},
+{'name':'_Nonfederalstudentloan','count':1.908760387,'group':'Closed','linkCount':3,'label':'Non-federal student loan(Closed): 13.8%','userCount':true,'url':'','shortName':'Non-federal student loan'},
+{'name':'_Nonfederalstudentloan','count':4.502361103,'group':'Closed with explanation','linkCount':3,'label':'Non-federal student loan(Closed with explanation): 21.2%','userCount':true,'url':'','shortName':'Non-federal student loan'},
+{'name':'_Nonfederalstudentloan','count':1.051939514,'group':'Closed with monetary relief','linkCount':3,'label':'Non-federal student loan(Closed with monetary relief): 10.3%','userCount':true,'url':'','shortName':'Non-federal student loan'},
+{'name':'_Nonfederalstudentloan','count':1.285540409,'group':'Closed with non-monetary relief','linkCount':3,'label':'Non-federal student loan(Closed with non-monetary relief): 11.3%','userCount':true,'url':'','shortName':'Non-federal student loan'},
+{'name':'_Nonfederalstudentloan','count':1.44,'group':'Closed with relief','linkCount':3,'label':'Non-federal student loan(Closed with relief): 12%','userCount':true,'url':'','shortName':'Non-federal student loan'},
+{'name':'_Nonfederalstudentloan','count':4.136742315,'group':'Closed without relief','linkCount':3,'label':'Non-federal student loan(Closed without relief): 20.3%','userCount':true,'url':'','shortName':'Non-federal student loan'},
+{'name':'_Otherphone,healthclub,etc','count':3.518273805,'group':'Closed','linkCount':3,'label':'Other (phone, health club, etc.)(Closed): 18.8%','userCount':true,'url':'','shortName':'Other (phone, health club, etc.)'},
+{'name':'_Otherphone,healthclub,etc','count':3.305554935,'group':'Closed with explanation','linkCount':3,'label':'Other (phone, health club, etc.)(Closed with explanation): 18.2%','userCount':true,'url':'','shortName':'Other (phone, health club, etc.)'},
+{'name':'_Otherphone,healthclub,etc','count':0.9781427364,'group':'Closed with monetary relief','linkCount':3,'label':'Other (phone, health club, etc.)(Closed with monetary relief): 9.9%','userCount':true,'url':'','shortName':'Other (phone, health club, etc.)'},
+{'name':'_Otherphone,healthclub,etc','count':1.756117187,'group':'Closed with non-monetary relief','linkCount':3,'label':'Other (phone, health club, etc.)(Closed with non-monetary relief): 13.3%','userCount':true,'url':'','shortName':'Other (phone, health club, etc.)'},
+{'name':'_Otherbankproduct/service','count':2.989344049,'group':'Closed','linkCount':3,'label':'Other bank product/service(Closed): 17.3%','userCount':true,'url':'','shortName':'Other bank product/service'},
+{'name':'_Otherbankproduct/service','count':5.464903365,'group':'Closed with explanation','linkCount':3,'label':'Other bank product/service(Closed with explanation): 23.4%','userCount':true,'url':'','shortName':'Other bank product/service'},
+{'name':'_Otherbankproduct/service','count':0.7120469003,'group':'Closed with monetary relief','linkCount':3,'label':'Other bank product/service(Closed with monetary relief): 8.4%','userCount':true,'url':'','shortName':'Other bank product/service'},
+{'name':'_Otherbankproduct/service','count':1.790660182,'group':'Closed with non-monetary relief','linkCount':3,'label':'Other bank product/service(Closed with non-monetary relief): 13.4%','userCount':true,'url':'','shortName':'Other bank product/service'},
+{'name':'_Otherbankproduct/service','count':2.295684113,'group':'Closed with relief','linkCount':3,'label':'Other bank product/service(Closed with relief): 15.2%','userCount':true,'url':'','shortName':'Other bank product/service'},
+{'name':'_Otherbankproduct/service','count':10.34769427,'group':'Closed without relief','linkCount':3,'label':'Other bank product/service(Closed without relief): 32.2%','userCount':true,'url':'','shortName':'Other bank product/service'},
+{'name':'_Othermortgage','count':3.377647919,'group':'Closed','linkCount':3,'label':'Other mortgage(Closed): 18.4%','userCount':true,'url':'','shortName':'Other mortgage'},
+{'name':'_Othermortgage','count':4.444352352,'group':'Closed with explanation','linkCount':3,'label':'Other mortgage(Closed with explanation): 21.1%','userCount':true,'url':'','shortName':'Other mortgage'},
+{'name':'_Othermortgage','count':1.790730578,'group':'Closed with monetary relief','linkCount':3,'label':'Other mortgage(Closed with monetary relief): 13.4%','userCount':true,'url':'','shortName':'Other mortgage'},
+{'name':'_Othermortgage','count':2.952668268,'group':'Closed with non-monetary relief','linkCount':3,'label':'Other mortgage(Closed with non-monetary relief): 17.2%','userCount':true,'url':'','shortName':'Other mortgage'},
+{'name':'_Othermortgage','count':1.704809569,'group':'Closed with relief','linkCount':3,'label':'Other mortgage(Closed with relief): 13.1%','userCount':true,'url':'','shortName':'Other mortgage'},
+{'name':'_Othermortgage','count':5.237685722,'group':'Closed without relief','linkCount':3,'label':'Other mortgage(Closed without relief): 22.9%','userCount':true,'url':'','shortName':'Other mortgage'},
+{'name':'_Otherspecialpurposecard','count':0,'group':'Closed','linkCount':3,'label':'Other special purpose card(Closed): 0%','userCount':true,'url':'','shortName':'Other special purpose card'},
+{'name':'_Otherspecialpurposecard','count':8.163265305,'group':'Closed with explanation','linkCount':3,'label':'Other special purpose card(Closed with explanation): 28.6%','userCount':true,'url':'','shortName':'Other special purpose card'},
+{'name':'_Otherspecialpurposecard','count':1,'group':'Closed with monetary relief','linkCount':3,'label':'Other special purpose card(Closed with monetary relief): 10%','userCount':true,'url':'','shortName':'Other special purpose card'},
+{'name':'_Otherspecialpurposecard','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Other special purpose card(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Other special purpose card'},
+{'name':'_Pawnloan','count':12.45674741,'group':'Closed with explanation','linkCount':3,'label':'Pawn loan(Closed with explanation): 35.3%','userCount':true,'url':'','shortName':'Pawn loan'},
+{'name':'_Pawnloan','count':0,'group':'Closed with non-monetary relief','linkCount':3,'label':'Pawn loan(Closed with non-monetary relief): 0%','userCount':true,'url':'','shortName':'Pawn loan'},
+{'name':'_Paydayloan','count':1.75763315,'group':'Closed','linkCount':3,'label':'Payday loan(Closed): 13.3%','userCount':true,'url':'','shortName':'Payday loan'},
+{'name':'_Paydayloan','count':1.949106088,'group':'Closed with explanation','linkCount':3,'label':'Payday loan(Closed with explanation): 14%','userCount':true,'url':'','shortName':'Payday loan'},
+{'name':'_Paydayloan','count':0.8079787897,'group':'Closed with monetary relief','linkCount':3,'label':'Payday loan(Closed with monetary relief): 9%','userCount':true,'url':'','shortName':'Payday loan'},
+{'name':'_Paydayloan','count':0.9775288072,'group':'Closed with non-monetary relief','linkCount':3,'label':'Payday loan(Closed with non-monetary relief): 9.9%','userCount':true,'url':'','shortName':'Payday loan'},
+{'name':'_Payrollcard','count':2.040816328,'group':'Closed with explanation','linkCount':3,'label':'Payroll card(Closed with explanation): 14.3%','userCount':true,'url':'','shortName':'Payroll card'},
+{'name':'_Payrollcard','count':4,'group':'Closed with monetary relief','linkCount':3,'label':'Payroll card(Closed with monetary relief): 20%','userCount':true,'url':'','shortName':'Payroll card'},
+{'name':'_Personallineofcredit','count':3.24,'group':'Closed','linkCount':3,'label':'Personal line of credit(Closed): 18%','userCount':true,'url':'','shortName':'Personal line of credit'},
+{'name':'_Personallineofcredit','count':5.802120517,'group':'Closed with explanation','linkCount':3,'label':'Personal line of credit(Closed with explanation): 24.1%','userCount':true,'url':'','shortName':'Personal line of credit'},
+{'name':'_Personallineofcredit','count':0.87890625,'group':'Closed with monetary relief','linkCount':3,'label':'Personal line of credit(Closed with monetary relief): 9.4%','userCount':true,'url':'','shortName':'Personal line of credit'},
+{'name':'_Personallineofcredit','count':3.3856,'group':'Closed with non-monetary relief','linkCount':3,'label':'Personal line of credit(Closed with non-monetary relief): 18.4%','userCount':true,'url':'','shortName':'Personal line of credit'},
+{'name':'_Personallineofcredit','count':6.925207754,'group':'Closed with relief','linkCount':3,'label':'Personal line of credit(Closed with relief): 26.3%','userCount':true,'url':'','shortName':'Personal line of credit'},
+{'name':'_Personallineofcredit','count':6.417777776,'group':'Closed without relief','linkCount':3,'label':'Personal line of credit(Closed without relief): 25.3%','userCount':true,'url':'','shortName':'Personal line of credit'},
+{'name':'_Refundanticipationcheck','count':9,'group':'Closed with explanation','linkCount':3,'label':'Refund anticipation check(Closed with explanation): 30%','userCount':true,'url':'','shortName':'Refund anticipation check'},
+{'name':'_Refundanticipationcheck','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Refund anticipation check(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Refund anticipation check'},
+{'name':'_Refundanticipationcheck','count':25,'group':'Closed with non-monetary relief','linkCount':3,'label':'Refund anticipation check(Closed with non-monetary relief): 50%','userCount':true,'url':'','shortName':'Refund anticipation check'},
+{'name':'_Reversemortgage','count':6.586263605,'group':'Closed','linkCount':3,'label':'Reverse mortgage(Closed): 25.7%','userCount':true,'url':'','shortName':'Reverse mortgage'},
+{'name':'_Reversemortgage','count':8.096490409,'group':'Closed with explanation','linkCount':3,'label':'Reverse mortgage(Closed with explanation): 28.5%','userCount':true,'url':'','shortName':'Reverse mortgage'},
+{'name':'_Reversemortgage','count':2.777777779,'group':'Closed with monetary relief','linkCount':3,'label':'Reverse mortgage(Closed with monetary relief): 16.7%','userCount':true,'url':'','shortName':'Reverse mortgage'},
+{'name':'_Reversemortgage','count':11.81640625,'group':'Closed with non-monetary relief','linkCount':3,'label':'Reverse mortgage(Closed with non-monetary relief): 34.4%','userCount':true,'url':'','shortName':'Reverse mortgage'},
+{'name':'_Reversemortgage','count':0,'group':'Closed with relief','linkCount':3,'label':'Reverse mortgage(Closed with relief): 0%','userCount':true,'url':'','shortName':'Reverse mortgage'},
+{'name':'_Reversemortgage','count':9.215561226,'group':'Closed without relief','linkCount':3,'label':'Reverse mortgage(Closed without relief): 30.4%','userCount':true,'url':'','shortName':'Reverse mortgage'},
+{'name':'_Savingsaccount','count':4.313609468,'group':'Closed','linkCount':3,'label':'Savings account(Closed): 20.8%','userCount':true,'url':'','shortName':'Savings account'},
+{'name':'_Savingsaccount','count':7.027925412,'group':'Closed with explanation','linkCount':3,'label':'Savings account(Closed with explanation): 26.5%','userCount':true,'url':'','shortName':'Savings account'},
+{'name':'_Savingsaccount','count':1.445250678,'group':'Closed with monetary relief','linkCount':3,'label':'Savings account(Closed with monetary relief): 12%','userCount':true,'url':'','shortName':'Savings account'},
+{'name':'_Savingsaccount','count':3.215219975,'group':'Closed with non-monetary relief','linkCount':3,'label':'Savings account(Closed with non-monetary relief): 17.9%','userCount':true,'url':'','shortName':'Savings account'},
+{'name':'_Savingsaccount','count':0.25,'group':'Closed with relief','linkCount':3,'label':'Savings account(Closed with relief): 5%','userCount':true,'url':'','shortName':'Savings account'},
+{'name':'_Savingsaccount','count':8.009967959,'group':'Closed without relief','linkCount':3,'label':'Savings account(Closed without relief): 28.3%','userCount':true,'url':'','shortName':'Savings account'},
+{'name':'_Secondmortgage','count':1.859504133,'group':'Closed','linkCount':3,'label':'Second mortgage(Closed): 13.6%','userCount':true,'url':'','shortName':'Second mortgage'},
+{'name':'_Secondmortgage','count':6.224039489,'group':'Closed with explanation','linkCount':3,'label':'Second mortgage(Closed with explanation): 24.9%','userCount':true,'url':'','shortName':'Second mortgage'},
+{'name':'_Secondmortgage','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Second mortgage(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Second mortgage'},
+{'name':'_Secondmortgage','count':3.260030866,'group':'Closed with non-monetary relief','linkCount':3,'label':'Second mortgage(Closed with non-monetary relief): 18.1%','userCount':true,'url':'','shortName':'Second mortgage'},
+{'name':'_Secondmortgage','count':0,'group':'Closed with relief','linkCount':3,'label':'Second mortgage(Closed with relief): 0%','userCount':true,'url':'','shortName':'Second mortgage'},
+{'name':'_Secondmortgage','count':9,'group':'Closed without relief','linkCount':3,'label':'Second mortgage(Closed without relief): 30%','userCount':true,'url':'','shortName':'Second mortgage'},
+{'name':'_Titleloan','count':0,'group':'Closed','linkCount':3,'label':'Title loan(Closed): 0%','userCount':true,'url':'','shortName':'Title loan'},
+{'name':'_Titleloan','count':4.432132964,'group':'Closed with explanation','linkCount':3,'label':'Title loan(Closed with explanation): 21.1%','userCount':true,'url':'','shortName':'Title loan'},
+{'name':'_Titleloan','count':7.111111113,'group':'Closed with monetary relief','linkCount':3,'label':'Title loan(Closed with monetary relief): 26.7%','userCount':true,'url':'','shortName':'Title loan'},
+{'name':'_Titleloan','count':6.25,'group':'Closed with non-monetary relief','linkCount':3,'label':'Title loan(Closed with non-monetary relief): 25%','userCount':true,'url':'','shortName':'Title loan'},
+{'name':'_Transitcard','count':25,'group':'Closed with explanation','linkCount':3,'label':'Transit card(Closed with explanation): 50%','userCount':true,'url':'','shortName':'Transit card'},
+{'name':'_Transitcard','count':4,'group':'Closed with monetary relief','linkCount':3,'label':'Transit card(Closed with monetary relief): 20%','userCount':true,'url':'','shortName':'Transit card'},
+{'name':'_Travelers/Cashierschecks','count':0,'group':'Closed','linkCount':3,'label':'Travelers/Cashiers checks(Closed): 0%','userCount':true,'url':'','shortName':'Travelers/Cashiers checks'},
+{'name':'_Travelers/Cashierschecks','count':19.75308642,'group':'Closed with explanation','linkCount':3,'label':'Travelers/Cashiers checks(Closed with explanation): 44.4%','userCount':true,'url':'','shortName':'Travelers/Cashiers checks'},
+{'name':'_Travelers/Cashierschecks','count':0,'group':'Closed with monetary relief','linkCount':3,'label':'Travelers/Cashiers checks(Closed with monetary relief): 0%','userCount':true,'url':'','shortName':'Travelers/Cashiers checks'},
+{'name':'_VAmortgage','count':7.787993508,'group':'Closed','linkCount':3,'label':'VA mortgage(Closed): 27.9%','userCount':true,'url':'','shortName':'VA mortgage'},
+{'name':'_VAmortgage','count':5.220865663,'group':'Closed with explanation','linkCount':3,'label':'VA mortgage(Closed with explanation): 22.8%','userCount':true,'url':'','shortName':'VA mortgage'},
+{'name':'_VAmortgage','count':1.701323251,'group':'Closed with monetary relief','linkCount':3,'label':'VA mortgage(Closed with monetary relief): 13%','userCount':true,'url':'','shortName':'VA mortgage'},
+{'name':'_VAmortgage','count':3.910115229,'group':'Closed with non-monetary relief','linkCount':3,'label':'VA mortgage(Closed with non-monetary relief): 19.8%','userCount':true,'url':'','shortName':'VA mortgage'},
+{'name':'_VAmortgage','count':5.668934241,'group':'Closed with relief','linkCount':3,'label':'VA mortgage(Closed with relief): 23.8%','userCount':true,'url':'','shortName':'VA mortgage'},
+{'name':'_VAmortgage','count':14.45256472,'group':'Closed without relief','linkCount':3,'label':'VA mortgage(Closed without relief): 38%','userCount':true,'url':'','shortName':'VA mortgage'},
+{'name':'_Vehiclelease','count':4.591836735,'group':'Closed','linkCount':3,'label':'Vehicle lease(Closed): 21.4%','userCount':true,'url':'','shortName':'Vehicle lease'},
+{'name':'_Vehiclelease','count':7.573921864,'group':'Closed with explanation','linkCount':3,'label':'Vehicle lease(Closed with explanation): 27.5%','userCount':true,'url':'','shortName':'Vehicle lease'},
+{'name':'_Vehiclelease','count':2.572089712,'group':'Closed with monetary relief','linkCount':3,'label':'Vehicle lease(Closed with monetary relief): 16%','userCount':true,'url':'','shortName':'Vehicle lease'},
+{'name':'_Vehiclelease','count':1.175787486,'group':'Closed with non-monetary relief','linkCount':3,'label':'Vehicle lease(Closed with non-monetary relief): 10.8%','userCount':true,'url':'','shortName':'Vehicle lease'},
+{'name':'_Vehiclelease','count':8.163265305,'group':'Closed with relief','linkCount':3,'label':'Vehicle lease(Closed with relief): 28.6%','userCount':true,'url':'','shortName':'Vehicle lease'},
+{'name':'_Vehiclelease','count':18.36734694,'group':'Closed without relief','linkCount':3,'label':'Vehicle lease(Closed without relief): 42.9%','userCount':true,'url':'','shortName':'Vehicle lease'},
+{'name':'_Vehicleloan','count':7.955292573,'group':'Closed','linkCount':3,'label':'Vehicle loan(Closed): 28.2%','userCount':true,'url':'','shortName':'Vehicle loan'},
+{'name':'_Vehicleloan','count':6.019181526,'group':'Closed with explanation','linkCount':3,'label':'Vehicle loan(Closed with explanation): 24.5%','userCount':true,'url':'','shortName':'Vehicle loan'},
+{'name':'_Vehicleloan','count':2.932565738,'group':'Closed with monetary relief','linkCount':3,'label':'Vehicle loan(Closed with monetary relief): 17.1%','userCount':true,'url':'','shortName':'Vehicle loan'},
+{'name':'_Vehicleloan','count':1.872156857,'group':'Closed with non-monetary relief','linkCount':3,'label':'Vehicle loan(Closed with non-monetary relief): 13.7%','userCount':true,'url':'','shortName':'Vehicle loan'},
+{'name':'_Vehicleloan','count':1.291322313,'group':'Closed with relief','linkCount':3,'label':'Vehicle loan(Closed with relief): 11.4%','userCount':true,'url':'','shortName':'Vehicle loan'},
+{'name':'_Vehicleloan','count':6.116314027,'group':'Closed without relief','linkCount':3,'label':'Vehicle loan(Closed without relief): 24.7%','userCount':true,'url':'','shortName':'Vehicle loan'},
+<!--end-->
+		],
+		"links":[
+		<!--end-->
+			
+
+
+	]}
+	<!--end-->
+	}};
+</script></head>
+</div>
+
+  
+<!--Text and junk-->
+
+			
+  <div id="chart">  </div>
+
+  <h6 id="woot"><font face="Helvetica" color="slategrey" align="left"> 
+
+      <font face="Helvetica" color="peach" >closed w/ non-monetary relief <br></font>
+        <font face="Helvetica" color="orange">closed w/ monetary relief<br></font>
+        <font face="Helvetica" color="green">closed w/ relief<br></font>
+        <font face="Helvetica" color="lightgreen">closed without relief<br></font>
+        <font face="Helvetica" color="lightblue"> closed w/ explanation<br></font>
+        <font face="Helvetica" color="blue"> Closed</font>
+      </h6>
+
+  
+
+
+
+ </body>
+  <div id="nav"> </div>
+</html>
